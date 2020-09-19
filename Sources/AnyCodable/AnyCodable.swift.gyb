@@ -1,0 +1,91 @@
+%{
+codable_types = ['Bool', 'String', 'Double', 'Float',
+                 'Int', 'Int8', 'Int16', 'Int32', 'Int64',
+                 'UInt', 'UInt8', 'UInt16', 'UInt32', 'UInt64']
+}%
+public enum AnyCodable: Codable, Equatable {
+% for type in codable_types:
+    case ${type}(${type})
+% end
+
+    public var rawValue: Codable {
+        switch self {
+        % for type in codable_types:
+        case let .${type}(value):
+            return value
+        % end
+        }
+    }
+    
+    enum TypeName: String, Codable {
+        % for type in codable_types:
+        case ${type}
+        % end
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case type,
+             value
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        % for type in codable_types:
+        case let .${type}(value):
+            try container.encode(TypeName.${type}.rawValue, forKey: .type)
+            try container.encode(value, forKey: .value)
+        % end
+        }
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        switch try container.decode(TypeName.self, forKey: .type) {
+        % for type in codable_types:
+        case .${type}:
+            self = try .${type}(container.decode(Swift.${type}.self, forKey: .value))
+        % end
+        }
+    }
+}
+
+extension Array where Element == Any {
+    public var anyCodable: [AnyCodable] {
+        compactMap {
+            % for type in codable_types:
+            if let value = $0 as? ${type} {
+                return value.anyCodable
+            }
+            % end
+            return nil
+        }
+    }
+}
+
+extension Array where Element == Codable {
+    public var anyCodable: [AnyCodable] {
+        compactMap {
+            % for type in codable_types:
+            if let value = $0 as? ${type} {
+                return value.anyCodable
+            }
+            % end
+            return nil
+        }
+    }
+}
+
+extension Array where Element == AnyCodable {
+    public var rawValue: [Codable] {
+        map(\.rawValue)
+    }
+}
+
+% for type in codable_types:
+extension ${type} {
+    public var anyCodable: AnyCodable {
+        .${type}(self)
+    }
+}
+% end
