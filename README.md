@@ -55,3 +55,10 @@ You can access the value of `AnyCodable` using `rawValue`, which will return `Co
 anyCodableArray[0].rawValue // "Hello, world!"
 anyCodableArray[1].rawValue // 0
 ```
+
+## Contributing
+
+This project is generated using [GYB](https://nshipster.com/swift-gyb/) (`brew install nshipster/formulae/gyb`):
+```sh
+gyb Sources/AnyCodable/AnyCodable.swift.gyb -o Sources/AnyCodable/AnyCodable.swift --line-directive ''
+```
