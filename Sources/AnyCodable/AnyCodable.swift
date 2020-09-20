@@ -280,6 +280,18 @@ extension Array where Element == AnyCodable {
     }
 }
 
+extension Array where Element: AnyCodableConvertible {
+    public var anyCodable: [AnyCodable] {
+        map(\.anyCodable)
+    }
+}
+
+extension AnyCodable: AnyCodableConvertible {
+    public var anyCodable: AnyCodable {
+        self
+    }
+}
+
 extension Bool: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .Bool(self)
