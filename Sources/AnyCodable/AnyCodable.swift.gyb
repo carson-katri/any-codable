@@ -3,6 +3,10 @@ codable_types = ['Bool', 'String', 'Double', 'Float',
                  'Int', 'Int8', 'Int16', 'Int32', 'Int64',
                  'UInt', 'UInt8', 'UInt16', 'UInt32', 'UInt64']
 }%
+public protocol AnyCodableConvertible {
+    var anyCodable: AnyCodable { get }
+}
+
 public enum AnyCodable: Codable, Equatable {
 % for type in codable_types:
     case ${type}(${type})
@@ -83,7 +87,7 @@ extension Array where Element == AnyCodable {
 }
 
 % for type in codable_types:
-extension ${type} {
+extension ${type}: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .${type}(self)
     }

@@ -1,3 +1,7 @@
+public protocol AnyCodableConvertible {
+    var anyCodable: AnyCodable { get }
+}
+
 public enum AnyCodable: Codable, Equatable {
     case Bool(Bool)
     case String(String)
@@ -253,77 +257,77 @@ extension Array where Element == Codable {
 }
 
 extension Array where Element == AnyCodable {
-    public var rawValue: [Any] {
+    public var rawValue: [Codable] {
         map(\.rawValue)
     }
 }
 
-extension Bool {
+extension Bool: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .Bool(self)
     }
 }
-extension String {
+extension String: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .String(self)
     }
 }
-extension Double {
+extension Double: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .Double(self)
     }
 }
-extension Float {
+extension Float: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .Float(self)
     }
 }
-extension Int {
+extension Int: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .Int(self)
     }
 }
-extension Int8 {
+extension Int8: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .Int8(self)
     }
 }
-extension Int16 {
+extension Int16: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .Int16(self)
     }
 }
-extension Int32 {
+extension Int32: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .Int32(self)
     }
 }
-extension Int64 {
+extension Int64: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .Int64(self)
     }
 }
-extension UInt {
+extension UInt: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .UInt(self)
     }
 }
-extension UInt8 {
+extension UInt8: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .UInt8(self)
     }
 }
-extension UInt16 {
+extension UInt16: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .UInt16(self)
     }
 }
-extension UInt32 {
+extension UInt32: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .UInt32(self)
     }
 }
-extension UInt64 {
+extension UInt64: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .UInt64(self)
     }
