@@ -1,3 +1,6 @@
+#if canImport(Foundation)
+import Foundation
+#endif
 public protocol AnyCodableConvertible {
     var anyCodable: AnyCodable { get }
 }
@@ -17,6 +20,7 @@ public enum AnyCodable: Codable, Equatable {
     case UInt16(UInt16)
     case UInt32(UInt32)
     case UInt64(UInt64)
+    case Date(Date)
 
     public var rawValue: Codable {
         switch self {
@@ -48,6 +52,8 @@ public enum AnyCodable: Codable, Equatable {
             return value
         case let .UInt64(value):
             return value
+        case let .Date(value):
+            return value
         }
     }
     
@@ -66,6 +72,7 @@ public enum AnyCodable: Codable, Equatable {
         case UInt16
         case UInt32
         case UInt64
+        case Date
     }
     
     enum CodingKeys: String, CodingKey {
@@ -118,6 +125,9 @@ public enum AnyCodable: Codable, Equatable {
         case let .UInt64(value):
             try container.encode(TypeName.UInt64.rawValue, forKey: .type)
             try container.encode(value, forKey: .value)
+        case let .Date(value):
+            try container.encode(TypeName.Date.rawValue, forKey: .type)
+            try container.encode(value, forKey: .value)
         }
     }
     
@@ -152,6 +162,8 @@ public enum AnyCodable: Codable, Equatable {
             self = try .UInt32(container.decode(Swift.UInt32.self, forKey: .value))
         case .UInt64:
             self = try .UInt64(container.decode(Swift.UInt64.self, forKey: .value))
+        case .Date:
+            self = try .Date(container.decode(Foundation.Date.self, forKey: .value))
         }
     }
 }
@@ -199,6 +211,9 @@ extension Array where Element == Any {
                 return value.anyCodable
             }
             if let value = $0 as? UInt64 {
+                return value.anyCodable
+            }
+            if let value = $0 as? Date {
                 return value.anyCodable
             }
             return nil
@@ -249,6 +264,9 @@ extension Array where Element == Codable {
                 return value.anyCodable
             }
             if let value = $0 as? UInt64 {
+                return value.anyCodable
+            }
+            if let value = $0 as? Date {
                 return value.anyCodable
             }
             return nil
@@ -330,5 +348,10 @@ extension UInt32: AnyCodableConvertible {
 extension UInt64: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .UInt64(self)
+    }
+}
+extension Date: AnyCodableConvertible {
+    public var anyCodable: AnyCodable {
+        .Date(self)
     }
 }

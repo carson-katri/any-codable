@@ -1,7 +1,17 @@
+#if canImport(Foundation)
+import Foundation
+#endif
 %{
+type_namespaces = ['Swift', 'Swift', 'Swift', 'Swift',
+                   'Swift', 'Swift', 'Swift', 'Swift', 'Swift',
+                   'Swift', 'Swift', 'Swift', 'Swift', 'Swift',
+                   # Foundation Specific
+                   'Foundation']
 codable_types = ['Bool', 'String', 'Double', 'Float',
                  'Int', 'Int8', 'Int16', 'Int32', 'Int64',
-                 'UInt', 'UInt8', 'UInt16', 'UInt32', 'UInt64']
+                 'UInt', 'UInt8', 'UInt16', 'UInt32', 'UInt64',
+                 # Foundation Specific
+                 'Date']
 }%
 public protocol AnyCodableConvertible {
     var anyCodable: AnyCodable { get }
@@ -46,9 +56,13 @@ public enum AnyCodable: Codable, Equatable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         switch try container.decode(TypeName.self, forKey: .type) {
-        % for type in codable_types:
+        % for i in range(len(codable_types)):
+        %{
+        type = codable_types[i]
+        namespace = type_namespaces[i]
+        }%
         case .${type}:
-            self = try .${type}(container.decode(Swift.${type}.self, forKey: .value))
+            self = try .${type}(container.decode(${namespace}.${type}.self, forKey: .value))
         % end
         }
     }
