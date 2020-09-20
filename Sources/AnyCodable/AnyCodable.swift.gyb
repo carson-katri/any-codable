@@ -12,19 +12,23 @@ codable_types = ['Bool', 'String', 'Double', 'Float',
                  'UInt', 'UInt8', 'UInt16', 'UInt32', 'UInt64',
                  # Foundation Specific
                  'Date']
+custom_impl = ['Array', 'Dictionary']
+custom_impl_namespaces = ['Swift', 'Swift']
 }%
 public protocol AnyCodableConvertible {
     var anyCodable: AnyCodable { get }
 }
 
-public enum AnyCodable: Codable, Equatable {
+public enum AnyCodable: Codable, Equatable, Hashable {
 % for type in codable_types:
     case ${type}(${type})
 % end
+    case Array([Self])
+    case Dictionary([Self:Self])
 
     public var rawValue: Codable {
         switch self {
-        % for type in codable_types:
+        % for type in codable_types + custom_impl:
         case let .${type}(value):
             return value
         % end
@@ -32,7 +36,7 @@ public enum AnyCodable: Codable, Equatable {
     }
     
     enum TypeName: String, Codable {
-        % for type in codable_types:
+        % for type in codable_types + custom_impl:
         case ${type}
         % end
     }
@@ -45,7 +49,7 @@ public enum AnyCodable: Codable, Equatable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         switch self {
-        % for type in codable_types:
+        % for type in codable_types + custom_impl:
         case let .${type}(value):
             try container.encode(TypeName.${type}.rawValue, forKey: .type)
             try container.encode(value, forKey: .value)
@@ -56,10 +60,10 @@ public enum AnyCodable: Codable, Equatable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         switch try container.decode(TypeName.self, forKey: .type) {
-        % for i in range(len(codable_types)):
+        % for i in range(len(codable_types + custom_impl)):
         %{
-        type = codable_types[i]
-        namespace = type_namespaces[i]
+        type = (codable_types + custom_impl)[i]
+        namespace = (type_namespaces + custom_impl_namespaces)[i]
         }%
         case .${type}:
             self = try .${type}(container.decode(${namespace}.${type}.self, forKey: .value))
@@ -100,9 +104,19 @@ extension Array where Element == AnyCodable {
     }
 }
 
-extension Array where Element: AnyCodableConvertible {
-    public var anyCodable: [AnyCodable] {
-        map(\.anyCodable)
+extension Array: AnyCodableConvertible where Element: AnyCodableConvertible {
+    public var anyCodable: AnyCodable {
+        .Array(map(\.anyCodable))
+    }
+}
+
+extension Dictionary: AnyCodableConvertible where Key: AnyCodableConvertible, Value: AnyCodableConvertible {
+    public var anyCodable: AnyCodable {
+        var newDict = [AnyCodable:AnyCodable]()
+        for key in self.keys {
+            newDict[key.anyCodable] = self[key]?.anyCodable
+        }
+        return .Dictionary(newDict)
     }
 }
 

@@ -5,7 +5,7 @@ public protocol AnyCodableConvertible {
     var anyCodable: AnyCodable { get }
 }
 
-public enum AnyCodable: Codable, Equatable {
+public enum AnyCodable: Codable, Equatable, Hashable {
     case Bool(Bool)
     case String(String)
     case Double(Double)
@@ -21,6 +21,8 @@ public enum AnyCodable: Codable, Equatable {
     case UInt32(UInt32)
     case UInt64(UInt64)
     case Date(Date)
+    case Array([Self])
+    case Dictionary([Self:Self])
 
     public var rawValue: Codable {
         switch self {
@@ -54,6 +56,10 @@ public enum AnyCodable: Codable, Equatable {
             return value
         case let .Date(value):
             return value
+        case let .Array(value):
+            return value
+        case let .Dictionary(value):
+            return value
         }
     }
     
@@ -73,6 +79,8 @@ public enum AnyCodable: Codable, Equatable {
         case UInt32
         case UInt64
         case Date
+        case Array
+        case Dictionary
     }
     
     enum CodingKeys: String, CodingKey {
@@ -128,6 +136,12 @@ public enum AnyCodable: Codable, Equatable {
         case let .Date(value):
             try container.encode(TypeName.Date.rawValue, forKey: .type)
             try container.encode(value, forKey: .value)
+        case let .Array(value):
+            try container.encode(TypeName.Array.rawValue, forKey: .type)
+            try container.encode(value, forKey: .value)
+        case let .Dictionary(value):
+            try container.encode(TypeName.Dictionary.rawValue, forKey: .type)
+            try container.encode(value, forKey: .value)
         }
     }
     
@@ -164,6 +178,10 @@ public enum AnyCodable: Codable, Equatable {
             self = try .UInt64(container.decode(Swift.UInt64.self, forKey: .value))
         case .Date:
             self = try .Date(container.decode(Foundation.Date.self, forKey: .value))
+        case .Array:
+            self = try .Array(container.decode(Swift.Array.self, forKey: .value))
+        case .Dictionary:
+            self = try .Dictionary(container.decode(Swift.Dictionary.self, forKey: .value))
         }
     }
 }
@@ -280,9 +298,19 @@ extension Array where Element == AnyCodable {
     }
 }
 
-extension Array where Element: AnyCodableConvertible {
-    public var anyCodable: [AnyCodable] {
-        map(\.anyCodable)
+extension Array: AnyCodableConvertible where Element: AnyCodableConvertible {
+    public var anyCodable: AnyCodable {
+        .Array(map(\.anyCodable))
+    }
+}
+
+extension Dictionary: AnyCodableConvertible where Key: AnyCodableConvertible, Value: AnyCodableConvertible {
+    public var anyCodable: AnyCodable {
+        var newDict = [AnyCodable:AnyCodable]()
+        for key in self.keys {
+            newDict[key.anyCodable] = self[key]?.anyCodable
+        }
+        return .Dictionary(newDict)
     }
 }
 
