@@ -314,6 +314,14 @@ extension Dictionary: AnyCodableConvertible where Key: AnyCodableConvertible, Va
     }
 }
 
+extension Dictionary where Value == AnyCodableConvertible {
+    public var anyCodable: [Key:AnyCodable] {
+        mapValues {
+            $0.anyCodable
+        }
+    }
+}
+
 extension AnyCodable: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         self
