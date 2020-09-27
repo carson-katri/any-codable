@@ -21,6 +21,7 @@ public enum AnyCodable: Codable, Equatable, Hashable {
     case UInt32(UInt32)
     case UInt64(UInt64)
     case Date(Date)
+    case Data(Data)
     case Array([Self])
     case Dictionary([Self:Self])
 
@@ -56,6 +57,8 @@ public enum AnyCodable: Codable, Equatable, Hashable {
             return value
         case let .Date(value):
             return value
+        case let .Data(value):
+            return value
         case let .Array(value):
             return value
         case let .Dictionary(value):
@@ -79,6 +82,7 @@ public enum AnyCodable: Codable, Equatable, Hashable {
         case UInt32
         case UInt64
         case Date
+        case Data
         case Array
         case Dictionary
     }
@@ -136,6 +140,9 @@ public enum AnyCodable: Codable, Equatable, Hashable {
         case let .Date(value):
             try container.encode(TypeName.Date.rawValue, forKey: .type)
             try container.encode(value, forKey: .value)
+        case let .Data(value):
+            try container.encode(TypeName.Data.rawValue, forKey: .type)
+            try container.encode(value, forKey: .value)
         case let .Array(value):
             try container.encode(TypeName.Array.rawValue, forKey: .type)
             try container.encode(value, forKey: .value)
@@ -178,6 +185,8 @@ public enum AnyCodable: Codable, Equatable, Hashable {
             self = try .UInt64(container.decode(Swift.UInt64.self, forKey: .value))
         case .Date:
             self = try .Date(container.decode(Foundation.Date.self, forKey: .value))
+        case .Data:
+            self = try .Data(container.decode(Foundation.Data.self, forKey: .value))
         case .Array:
             self = try .Array(container.decode(Swift.Array.self, forKey: .value))
         case .Dictionary:
@@ -234,6 +243,9 @@ extension Array where Element == Any {
             if let value = $0 as? Date {
                 return value.anyCodable
             }
+            if let value = $0 as? Data {
+                return value.anyCodable
+            }
             return nil
         }
     }
@@ -285,6 +297,9 @@ extension Array where Element == Codable {
                 return value.anyCodable
             }
             if let value = $0 as? Date {
+                return value.anyCodable
+            }
+            if let value = $0 as? Data {
                 return value.anyCodable
             }
             return nil
@@ -401,5 +416,10 @@ extension UInt64: AnyCodableConvertible {
 extension Date: AnyCodableConvertible {
     public var anyCodable: AnyCodable {
         .Date(self)
+    }
+}
+extension Data: AnyCodableConvertible {
+    public var anyCodable: AnyCodable {
+        .Data(self)
     }
 }

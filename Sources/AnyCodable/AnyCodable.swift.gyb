@@ -6,12 +6,12 @@ type_namespaces = ['Swift', 'Swift', 'Swift', 'Swift',
                    'Swift', 'Swift', 'Swift', 'Swift', 'Swift',
                    'Swift', 'Swift', 'Swift', 'Swift', 'Swift',
                    # Foundation Specific
-                   'Foundation']
+                   'Foundation', 'Foundation']
 codable_types = ['Bool', 'String', 'Double', 'Float',
                  'Int', 'Int8', 'Int16', 'Int32', 'Int64',
                  'UInt', 'UInt8', 'UInt16', 'UInt32', 'UInt64',
                  # Foundation Specific
-                 'Date']
+                 'Date', 'Data']
 custom_impl = ['Array', 'Dictionary']
 custom_impl_namespaces = ['Swift', 'Swift']
 }%
